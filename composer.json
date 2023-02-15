@@ -1,9 +1,10 @@
 {
     "name": "hajarrashidi/bankid-php",
     "type": "library",
+    "version": "1.0.0",
     "autoload": {
         "psr-4": {
-            "Hajarrashidi\\BankidPhp\\": "src/"
+            "hajarrashidi\\BankID\\": "src/"
         }
     },
     "authors": [
