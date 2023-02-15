@@ -17,10 +17,10 @@ If you want to contribute to this project, you can clone this repository and use
 ```json
 "repositories": [{
     "type": "path",
-     "url": "C:\\xampp\\htdocs\\bankid-php"
+     "url": "C:\\xampp\\htdocs\\bankid-sweden-php"
 }],
 "require": {
-    "hajarrashidi/bankid-php": "1.*"
+    "hajarrashidi/bankid-sweden-php": "1.*"
 },,
 ```
 3. Make sure `url` is correct
