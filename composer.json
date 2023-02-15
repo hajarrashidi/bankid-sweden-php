@@ -1,0 +1,16 @@
+{
+    "name": "hajarrashidi/bankid-php",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Hajarrashidi\\BankidPhp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Hajar Rashidi",
+            "email": "hajarrashidi@gmail.com"
+        }
+    ],
+    "require": {}
+}
