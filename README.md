@@ -2,8 +2,10 @@
 
 **BankID Sweden PHP** is a PHP library for the [BankID Web service API.](https://www.bankid.com/utvecklare/guider/teknisk-integrationsguide/webbservice-api)
 
+``This project is under development. Released versions of this library will have their own git branches. ``
+
 ## API Versions support
-- [x] https://appapi2.bankid.com/rp/v5.1
+- [ ] https://appapi2.bankid.com/rp/v5.1
 
 ## Requirements
 * Composer 
