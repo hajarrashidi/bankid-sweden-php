@@ -10,6 +10,6 @@ class BankID
 
     public function test(): string
     {
-        return 'I am BankID PHP';
+        return 'I am BankID Sweden PHP';
     }
 }
