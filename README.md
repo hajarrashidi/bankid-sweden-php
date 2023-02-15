@@ -25,6 +25,7 @@ If you want to contribute to this project, you can clone this repository and use
 4. Run `composer update`
 5. Example of use 
 ```php
-    $bankid = (new \hajarrashidi\BankID\BankID())->test();
+    $bankid = new \BankID\BankID();
+    echo $bankid->test();
+    // Output "I am BankID PHP"
    ```
-6. Output ``I am BankID PHP``

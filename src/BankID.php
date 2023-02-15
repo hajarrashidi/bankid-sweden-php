@@ -1,5 +1,5 @@
 <?php
-namespace hajarrashidi\BankID;
+namespace BankID;
 
 class BankID {
     public function __construct() {
