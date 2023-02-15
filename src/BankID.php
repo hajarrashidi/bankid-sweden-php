@@ -1,11 +1,15 @@
 <?php
+
 namespace BankID;
 
-class BankID {
-    public function __construct() {
+class BankID
+{
+    public function __construct()
+    {
     }
 
-    public function test(): string {
+    public function test(): string
+    {
         return 'I am BankID PHP';
     }
 }
