@@ -34,5 +34,4 @@ If you want to contribute to this project, you can clone this repository and use
     echo $bankid->test();
     // Output "I am BankID PHP"
    ```
- # Author
- Hajar Rashidi
+ 
