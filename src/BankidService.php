@@ -1,58 +1,60 @@
 <?php
+
 namespace BankID;
 
 class BankidService
 {
+
     // BankID /auth endpoint
     public function auth($endUserIp)
     {
-
-        // make a class called BankidApiVersion5_1
-
-        $apiUrl = 'https://appapi2.test.bankid.com/rp/v5.1/auth';
-        $requestBody = [
-            'personalNumber' => '200001132380',
-            'endUserIp' => $endUserIp
+        $apiVersion = '5.1';
+        $bankidMethod = 'auth';
+        $apiUrl = 'https://appapi2.test.bankid.com/rp/v' . $apiVersion . '/' . $bankidMethod;
+        $personalNumber = '200001132380';
+        $bodyParams = [
+            'personalNumber' => $personalNumber,
+            'endUserIp' => $endUserIp,
         ];
-        // get testcert.pem in certifications folder and make a post request to the api
-        $client = new \GuzzleHttp\Client([
-            'base_uri' => $apiUrl,
-            'certifications' => __DIR__ . '/certifications/FPTestcert4_20220818.pem',
-            'verify' => false,
-            'headers' => [
-                'Content-Type' => 'application/json'
-            ]
-        ]);
+
+        $guzzleClient = new \GuzzleHttp\Client();
 
         try {
-            $response = $client->request('POST', $apiUrl, ['json' => $requestBody]);
+            $response = $guzzleClient->post($apiUrl, [
+                'cert' => __DIR__ . '/certifications/FPTestcert4_20220818.pem',
+                'verify' => false,
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+                'body' => json_encode($bodyParams)
+
+            ]);
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             $response = $e->getResponse();
+            dd($response);
             $responseBodyAsString = $response->getBody()->getContents();
-            dd($responseBodyAsString);
+            return json_decode($responseBodyAsString, true);
         }
-
-        $result = json_decode($response->getBody()->getContents());
-        dd($result);
-
-        return $result;
-
+        return json_decode($response->getBody(), true);
 
     }
 
     // BankID /sign endpoint
     public function sign()
     {
+
     }
 
     // BankID /collect endpoint
-    public function collect()
+    public function collect($orderRef)
     {
+
     }
 
     // BankID generate animated QR code string
     public function generateQRCode()
     {
+
     }
 
 }
