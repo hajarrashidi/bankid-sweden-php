@@ -9,13 +9,24 @@ class BankidService
 {
     private const API_VERSION = '5.1';
     private const BASE_URL = 'https://appapi2.test.bankid.com/rp/v';
-
+    private const BANKID_TEST_CERTIFICATION_20220818 = __DIR__ . '/certifications/FPTestcert4_20220818.pem';
     private const ENDPOINT_AUTH = '/auth';
     private const ENDPOINT_SIGN = '/sign';
     private const ENDPOINT_COLLECT = '/collect';
-    private const BANKID_TEST_CERTIFICATION_20220818 = __DIR__ . '/certifications/FPTestcert4_20220818.pem';
 
-    public function auth($endUserIp)
+    private $client;
+
+    public function __construct()
+    {
+        $this->client = new Client([
+            'verify' => false,
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
+        ]);
+    }
+
+    public function auth(string $endUserIp)
     {
         $url = self::BASE_URL . self::API_VERSION . self::ENDPOINT_AUTH;
 
@@ -27,7 +38,7 @@ class BankidService
         return $this->getResponse($url, $bodyParameters);
     }
 
-    public function sign($endUserIp)
+    public function sign(string $endUserIp)
     {
         $url = self::BASE_URL . self::API_VERSION . self::ENDPOINT_SIGN;
 
@@ -40,7 +51,7 @@ class BankidService
         return $this->getResponse($url, $bodyParameters);
     }
 
-    public function collect($orderRef)
+    public function collect(string $orderRef)
     {
         $url = self::BASE_URL . self::API_VERSION . self::ENDPOINT_COLLECT;
 
@@ -53,20 +64,13 @@ class BankidService
 
     private function getResponse(string $url, array $bodyParameters)
     {
-        $client = new Client();
-
         try {
-            $response = $client->post($url, [
+            $response = $this->client->post($url, [
                 'cert' => self::BANKID_TEST_CERTIFICATION_20220818,
-                'verify' => false,
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                ],
                 'body' => json_encode($bodyParameters)
             ]);
         } catch (ClientException $e) {
             $response = $e->getResponse();
-            dd($response);
             $responseBodyAsString = $response->getBody()->getContents();
             return json_decode($responseBodyAsString, true);
         }
