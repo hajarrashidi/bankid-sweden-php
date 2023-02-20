@@ -1,6 +1,6 @@
 # BankID Sweden PHP
 
-**BankID Sweden PHP** is a PHP library for the [BankID Web service API.](https://www.bankid.com/utvecklare/guider/teknisk-integrationsguide/webbservice-api)
+**BankID Sweden PHP** is a PHP library/wrapper for the [BankID Web service API.](https://www.bankid.com/utvecklare/guider/teknisk-integrationsguide/webbservice-api)
 
 ``This project is under development. Released versions will be published on packagist.org``
 
@@ -31,8 +31,6 @@ If you want to contribute to this project, you can clone this repository and use
 4. Run `composer update`
 5. Example of use 
 ```php
-    $bankid = new \BankID\BankID();
-    echo $bankid->test();
-    // Output "I am BankID PHP"
+
    ```
  

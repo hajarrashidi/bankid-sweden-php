@@ -7,18 +7,13 @@ use GuzzleHttp\Exception\ClientException;
 
 class BankidService
 {
-    private const API_VERSION = '5.1';
-    private const BASE_URL = 'https://appapi2.test.bankid.com/rp/v';
-    private const BANKID_TEST_CERTIFICATION_20220818 = __DIR__ . '/certifications/FPTestcert4_20220818.pem';
+    private Bankid $bankid;
+    private Client $client;
 
-    private const ENDPOINT_AUTH = '/auth';
-    private const ENDPOINT_SIGN = '/sign';
-    private const ENDPOINT_COLLECT = '/collect';
-
-    private $client;
-
-    public function __construct()
+    public function __construct(string $environment, float $apiVersion)
     {
+        $this->bankid = new Bankid($environment, $apiVersion);
+
         $this->client = new Client([
             'verify' => false,
             'headers' => [
@@ -29,8 +24,6 @@ class BankidService
 
     public function auth(string $endUserIp, ?string $personalNumber = null)
     {
-        $url = self::BASE_URL . self::API_VERSION . self::ENDPOINT_AUTH;
-
         $bodyParameters = [
             'endUserIp' => $endUserIp,
         ];
@@ -39,39 +32,35 @@ class BankidService
             $bodyParameters['personalNumber'] = $personalNumber;
         }
 
-        return $this->getResponse($url, $bodyParameters);
+        return $this->getResponse($this->bankid->getAuthUrl(), $bodyParameters);
     }
 
-    public function sign(string $endUserIp)
+    public function sign(string $endUserIp, string $personalNumber, string $userVisibleData)
     {
-        $url = self::BASE_URL . self::API_VERSION . self::ENDPOINT_SIGN;
-
         $bodyParameters = [
-            'personalNumber' => '200001132380',
+            'personalNumber' => $personalNumber,
             'endUserIp' => $endUserIp,
-            'userVisibleData' => base64_encode('Hello World!')
+            'userVisibleData' => base64_encode($userVisibleData),
         ];
 
-        return $this->getResponse($url, $bodyParameters);
+        return $this->getResponse($this->bankid->getSignUrl(), $bodyParameters);
     }
 
     public function collect(string $orderRef)
     {
-        $url = self::BASE_URL . self::API_VERSION . self::ENDPOINT_COLLECT;
-
         $bodyParameters = [
             'orderRef' => $orderRef,
         ];
 
-        return $this->getResponse($url, $bodyParameters);
+        return $this->getResponse($this->bankid->getCollectUrl(), $bodyParameters);
     }
 
     private function getResponse(string $url, array $bodyParameters)
     {
         try {
             $response = $this->client->post($url, [
-                'cert' => self::BANKID_TEST_CERTIFICATION_20220818,
-                'body' => json_encode($bodyParameters)
+                'cert' => Bankid::BANKID_TEST_CERTIFICATION_20220818,
+                'body' => json_encode($bodyParameters),
             ]);
         } catch (ClientException $e) {
             $response = $e->getResponse();
@@ -79,15 +68,15 @@ class BankidService
             return json_decode($responseBodyAsString, true);
         }
 
-        return json_decode($response->getBody(), true);
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     public function generateQRCodeText(string $qrStartToken, string $qrStartSecret)
     {
-//        $prefix = 'bankid';
-//        $time = time() - 5; // Subtract 1 second to ensure the first code is valid
-//        $qrAuthCode = hash_hmac('sha256', $qrStartSecret, $time);
-//
-//        return "{$prefix}.{$qrStartToken}.{$time}.{$qrAuthCode}";
+        $prefix = 'bankid';
+        $time = time() - 1; // Subtract 1 second to ensure the first code is valid
+        $qrAuthCode = hash_hmac('sha256', $qrStartSecret, $time);
+
+        return "{$prefix}.{$qrStartToken}.{$time}.{$qrAuthCode}";
     }
 }
