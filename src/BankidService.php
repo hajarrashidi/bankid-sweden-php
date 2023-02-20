@@ -10,6 +10,7 @@ class BankidService
     private const API_VERSION = '5.1';
     private const BASE_URL = 'https://appapi2.test.bankid.com/rp/v';
     private const BANKID_TEST_CERTIFICATION_20220818 = __DIR__ . '/certifications/FPTestcert4_20220818.pem';
+
     private const ENDPOINT_AUTH = '/auth';
     private const ENDPOINT_SIGN = '/sign';
     private const ENDPOINT_COLLECT = '/collect';
@@ -26,14 +27,17 @@ class BankidService
         ]);
     }
 
-    public function auth(string $endUserIp)
+    public function auth(string $endUserIp, ?string $personalNumber = null)
     {
         $url = self::BASE_URL . self::API_VERSION . self::ENDPOINT_AUTH;
 
         $bodyParameters = [
-            'personalNumber' => '200001132380',
             'endUserIp' => $endUserIp,
         ];
+
+        if ($personalNumber !== null) {
+            $bodyParameters['personalNumber'] = $personalNumber;
+        }
 
         return $this->getResponse($url, $bodyParameters);
     }
@@ -78,8 +82,12 @@ class BankidService
         return json_decode($response->getBody(), true);
     }
 
-    public function generateQRCode()
+    public function generateQRCodeText(string $qrStartToken, string $qrStartSecret)
     {
-        // BankID generate animated QR code string
+//        $prefix = 'bankid';
+//        $time = time() - 5; // Subtract 1 second to ensure the first code is valid
+//        $qrAuthCode = hash_hmac('sha256', $qrStartSecret, $time);
+//
+//        return "{$prefix}.{$qrStartToken}.{$time}.{$qrAuthCode}";
     }
 }
