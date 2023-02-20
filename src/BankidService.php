@@ -7,51 +7,57 @@ use GuzzleHttp\Exception\ClientException;
 
 class BankidService
 {
-    private $apiVersion = '5.1';
-    private $baseUrl = 'https://appapi2.test.bankid.com/rp/v';
+    private const API_VERSION = '5.1';
+    private const BASE_URL = 'https://appapi2.test.bankid.com/rp/v';
 
-    private $certPath = __DIR__ . '/certifications/FPTestcert4_20220818.pem';
+    private const ENDPOINT_AUTH = '/auth';
+    private const ENDPOINT_SIGN = '/sign';
+    private const ENDPOINT_COLLECT = '/collect';
+    private const BANKID_TEST_CERTIFICATION_20220818 = __DIR__ . '/certifications/FPTestcert4_20220818.pem';
 
     public function auth($endUserIp)
     {
-        $url = $this->baseUrl . $this->apiVersion . '/auth';
+        $url = self::BASE_URL . self::API_VERSION . self::ENDPOINT_AUTH;
 
-        $params = [
+        $bodyParameters = [
             'personalNumber' => '200001132380',
             'endUserIp' => $endUserIp,
         ];
 
-        return $this->makeRequest($url, $params);
+        return $this->getResponse($url, $bodyParameters);
     }
 
-    public function sign()
+    public function sign($endUserIp)
     {
-        // This endpoint is not prioritized right now.
+        $url = self::BASE_URL . self::API_VERSION . self::ENDPOINT_SIGN;
+
+        $bodyParameters = [
+            'personalNumber' => '200001132380',
+            'endUserIp' => $endUserIp,
+            'userVisibleData' => base64_encode('Hello World!')
+        ];
+
+        return $this->getResponse($url, $bodyParameters);
     }
 
     public function collect($orderRef)
     {
-        $url = $this->baseUrl . $this->apiVersion . '/collect';
+        $url = self::BASE_URL . self::API_VERSION . self::ENDPOINT_COLLECT;
 
-        $params = [
+        $bodyParameters = [
             'orderRef' => $orderRef,
         ];
 
-        return $this->makeRequest($url, $params);
+        return $this->getResponse($url, $bodyParameters);
     }
 
-    public function generateQRCode()
-    {
-        // BankID generate animated QR code string
-    }
-
-    private function makeRequest(string $url, array $bodyParameters)
+    private function getResponse(string $url, array $bodyParameters)
     {
         $client = new Client();
 
         try {
             $response = $client->post($url, [
-                'cert' => $this->certPath,
+                'cert' => self::BANKID_TEST_CERTIFICATION_20220818,
                 'verify' => false,
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -66,5 +72,10 @@ class BankidService
         }
 
         return json_decode($response->getBody(), true);
+    }
+
+    public function generateQRCode()
+    {
+        // BankID generate animated QR code string
     }
 }
