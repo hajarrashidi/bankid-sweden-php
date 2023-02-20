@@ -9,6 +9,7 @@
 
 ## Requirements
 * Composer 
+* PHP 7.4 or higher
 ## Installation
 Currently not available on packagist.org
 
