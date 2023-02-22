@@ -2,6 +2,9 @@
 
 namespace BankID;
 
+use BankID\Models\Response\ResponseModel;
+use BankID\Models\Response\CollectResponse;
+use BankID\Models\Response\OrderResponse;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 
@@ -10,9 +13,9 @@ class BankidService
     private Bankid $bankid;
     private Client $client;
 
-    public function __construct(string $environment, float $apiVersion)
+    public function __construct(Bankid $bankid)
     {
-        $this->bankid = new Bankid($environment, $apiVersion);
+        $this->bankid = $bankid;
 
         $this->client = new Client([
             'verify' => false,
@@ -22,61 +25,56 @@ class BankidService
         ]);
     }
 
-    public function auth(string $endUserIp, ?string $personalNumber = null)
+    public function auth(string $endUserIp, ?string $personalNumber = null): ?OrderResponse
     {
-        $bodyParameters = [
+        $parameters = [
             'endUserIp' => $endUserIp,
         ];
 
         if ($personalNumber !== null) {
-            $bodyParameters['personalNumber'] = $personalNumber;
+            $parameters['personalNumber'] = $personalNumber;
         }
 
-        return $this->getResponse($this->bankid->getAuthUrl(), $bodyParameters);
+        return $this->makeRequest(Bankid::METHOD_AUTH, $parameters, OrderResponse::class);
     }
 
-    public function sign(string $endUserIp, string $personalNumber, string $userVisibleData)
+    public function collect(string $orderRef): CollectResponse
     {
-        $bodyParameters = [
-            'personalNumber' => $personalNumber,
-            'endUserIp' => $endUserIp,
-            'userVisibleData' => base64_encode($userVisibleData),
-        ];
-
-        return $this->getResponse($this->bankid->getSignUrl(), $bodyParameters);
-    }
-
-    public function collect(string $orderRef)
-    {
-        $bodyParameters = [
+        $parameters = [
             'orderRef' => $orderRef,
         ];
 
-        return $this->getResponse($this->bankid->getCollectUrl(), $bodyParameters);
+        return $this->makeRequest(Bankid::METHOD_COLLECT, $parameters, CollectResponse::class);
     }
 
-    private function getResponse(string $url, array $bodyParameters)
+    public function cancel(string $orderRef): ?ResponseModel
     {
+        $parameters = [
+            'orderRef' => $orderRef,
+        ];
+
+        return $this->makeRequest(Bankid::METHOD_CANCEL, $parameters);
+    }
+
+    private function makeRequest(string $method, array $parameters, string $responseClass = null): ?ResponseModel
+    {
+        $url = $this->bankid->getBankidUrl($method);
+
         try {
             $response = $this->client->post($url, [
-                'cert' => Bankid::BANKID_TEST_CERTIFICATION_20220818,
-                'body' => json_encode($bodyParameters),
+                'cert' => $this->bankid->getCertificationPath(),
+                'body' => json_encode($parameters),
             ]);
+
+            if ($responseClass !== null) {
+                // returns the fully qualified class name (FQCN) of a class, including the namespace.
+                return new $responseClass($response);
+            }
+
+            return $response;
         } catch (ClientException $e) {
-            $response = $e->getResponse();
-            $responseBodyAsString = $response->getBody()->getContents();
-            return json_decode($responseBodyAsString, true);
+            // TODO: Handle error
+
         }
-
-        return json_decode($response->getBody()->getContents(), true);
-    }
-
-    public function generateQRCodeText(string $qrStartToken, string $qrStartSecret)
-    {
-        $prefix = 'bankid';
-        $time = time() - 1; // Subtract 1 second to ensure the first code is valid
-        $qrAuthCode = hash_hmac('sha256', $qrStartSecret, $time);
-
-        return "{$prefix}.{$qrStartToken}.{$time}.{$qrAuthCode}";
     }
 }

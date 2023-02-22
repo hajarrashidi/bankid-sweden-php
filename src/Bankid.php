@@ -4,9 +4,9 @@ namespace BankID;
 
 class Bankid
 {
-    private $apiVersion;
-
-    private $baseUrl;
+    private string $environment;
+    private float $apiVersion;
+    private string $baseUrl;
 
     const ENVIRONMENT_TEST = 'test';
     const ENVIRONMENT_PRODUCTION = 'production';
@@ -17,13 +17,14 @@ class Bankid
     const METHOD_AUTH = 'auth';
     const METHOD_SIGN = 'sign';
     const METHOD_COLLECT = 'collect';
+    const METHOD_CANCEL = 'cancel';
 
     const RESPONSE_BODY_KEY_ORDERREF = 'orderRef';
     const RESPONSE_BODY_KEY_AUTOSTARTTOKEN = 'autoStartToken';
 
     const API_VERSION_5_1 = 5.1;
     
-    const BANKID_TEST_CERTIFICATION_20220818 = __DIR__ . '/certifications/FPTestcert4_20220818.pem';
+    const BANKID_TEST_CERTIFICATION_PATH_20220818 = __DIR__ . '/certifications/FPTestcert4_20220818.pem';
 
     /**
      * @param string $apiVersion currently only '5.1' is supported
@@ -31,6 +32,7 @@ class Bankid
      */
     public function __construct(string $environment, string $apiVersion)
     {
+        $this->environment = $environment;
         $this->apiVersion = $apiVersion;
         $this->baseUrl = ($environment === self::ENVIRONMENT_PRODUCTION) ? self::BASE_URL_PRODUCTION : self::BASE_URL_TEST;
     }
@@ -40,23 +42,21 @@ class Bankid
         return $this->apiVersion;
     }
 
-    public function getAuthUrl(): string
+    public function getBankidUrl(string $bankidMethod): string
     {
-        return $this->getMethodUrl(self::METHOD_AUTH);
+        return "{$this->baseUrl}{$this->apiVersion}/{$bankidMethod}";
     }
 
-    public function getSignUrl(): string
+    /**
+     * @param string $bankidEnvironment either 'test' or 'production'
+     */
+    public function getCertificationPath(): string
     {
-        return $this->getMethodUrl(self::METHOD_SIGN);
-    }
+        // TODO implement support for production environment
+        if ($this->environment === self::ENVIRONMENT_PRODUCTION) {
+            throw new \Exception('Production environment not supported yet');
+        }
 
-    public function getCollectUrl(): string
-    {
-        return $this->getMethodUrl(self::METHOD_COLLECT);
-    }
-
-    public function getMethodUrl(string $method): string
-    {
-        return "{$this->baseUrl}{$this->apiVersion}/{$method}";
+        return self::BANKID_TEST_CERTIFICATION_PATH_20220818;
     }
 }
