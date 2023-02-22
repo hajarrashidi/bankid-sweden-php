@@ -19,11 +19,6 @@ class Bankid
     const METHOD_COLLECT = 'collect';
     const METHOD_CANCEL = 'cancel';
 
-    const RESPONSE_BODY_KEY_ORDERREF = 'orderRef';
-    const RESPONSE_BODY_KEY_AUTOSTARTTOKEN = 'autoStartToken';
-
-    const API_VERSION_5_1 = 5.1;
-    
     const BANKID_TEST_CERTIFICATION_PATH_20220818 = __DIR__ . '/certifications/FPTestcert4_20220818.pem';
 
     /**
@@ -35,11 +30,6 @@ class Bankid
         $this->environment = $environment;
         $this->apiVersion = $apiVersion;
         $this->baseUrl = ($environment === self::ENVIRONMENT_PRODUCTION) ? self::BASE_URL_PRODUCTION : self::BASE_URL_TEST;
-    }
-
-    public function getApiVersion(): string
-    {
-        return $this->apiVersion;
     }
 
     public function getBankidUrl(string $bankidMethod): string
