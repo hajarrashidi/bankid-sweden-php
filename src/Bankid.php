@@ -11,6 +11,8 @@ class Bankid
     const ENVIRONMENT_TEST = 'test';
     const ENVIRONMENT_PRODUCTION = 'production';
 
+    const API_VERSION_5_1 = 5.1;
+
     const BASE_URL_TEST = 'https://appapi2.test.bankid.com/rp/v';
     const BASE_URL_PRODUCTION = 'https://appapi2.bankid.com/rp/v';
 
