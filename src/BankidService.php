@@ -2,22 +2,24 @@
 
 namespace BankID;
 
+use BankID\Models\Response\ErrorResponse;
 use BankID\Models\Response\ResponseModel;
 use BankID\Models\Response\CollectResponse;
 use BankID\Models\Response\OrderResponse;
+use BankID\Models\Response\CancelResponse;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 
 class BankidService
 {
-    private Bankid $bankid;
-    private Client $client;
+    private Bankid $bankidClient;
+    private Client $guzzleClient;
 
     public function __construct(Bankid $bankid)
     {
-        $this->bankid = $bankid;
+        $this->bankidClient = $bankid;
 
-        $this->client = new Client([
+        $this->guzzleClient = new Client([
             'verify' => false,
             'headers' => [
                 'Content-Type' => 'application/json',
@@ -25,7 +27,7 @@ class BankidService
         ]);
     }
 
-    public function auth(string $endUserIp, ?string $personalNumber = null): ?OrderResponse
+    public function auth(string $endUserIp, ?string $personalNumber = null)
     {
         $parameters = [
             'endUserIp' => $endUserIp,
@@ -47,34 +49,29 @@ class BankidService
         return $this->makeRequest(Bankid::METHOD_COLLECT, $parameters, CollectResponse::class);
     }
 
-    public function cancel(string $orderRef): ?ResponseModel
+    public function cancel(string $orderRef)
     {
         $parameters = [
             'orderRef' => $orderRef,
         ];
 
-        return $this->makeRequest(Bankid::METHOD_CANCEL, $parameters);
+        return $this->makeRequest(Bankid::METHOD_CANCEL, $parameters, CancelResponse::class);
     }
 
-    private function makeRequest(string $method, array $parameters, string $responseClass = null): ?ResponseModel
+    private function makeRequest(string $method, array $parameters, string $responseClass = null)
     {
-        $url = $this->bankid->getBankidUrl($method);
+        $url = $this->bankidClient->getBankidUrl($method);
 
         try {
-            $response = $this->client->post($url, [
-                'cert' => $this->bankid->getCertificationPath(),
+            $response = $this->guzzleClient->post($url, [
+                'cert' => $this->bankidClient->getCertificationPath(),
                 'body' => json_encode($parameters),
             ]);
-
-            if ($responseClass !== null) {
-                // returns the fully qualified class name (FQCN) of a class, including the namespace.
-                return new $responseClass($response);
-            }
-
-            return $response;
         } catch (ClientException $e) {
-            // TODO: Handle error
-
+            return new ErrorResponse($e->getResponse());
         }
+
+        return $responseClass !== null ? new $responseClass($response) : $response;
     }
+
 }
